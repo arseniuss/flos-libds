@@ -32,52 +32,52 @@
         ds_alloc_func_t alloc_func;                                                                                    \
         ds_realloc_func_t realloc_func;                                                                                \
         ds_free_func_t free_func;                                                                                      \
-    } ds_ ## __name ## _vec_t;                                                                                         \
+    } __name ## _vec_t;                                                                                                \
                                                                                                                        \
-    static inline void ds_ ## __name ## _vec_create(ds_ ## __name ## _vec_t *vector) {                                 \
+    static inline void __name ## _vec_create(__name ## _vec_t *vector) {                                               \
         ds_vec_create((ds_vec_t *)vector);                                                                             \
     }                                                                                                                  \
                                                                                                                        \
-    static inline void ds_ ## __name ## _vec_append(ds_ ## __name ## _vec_t *vector, __type value) {                   \
+    static inline void __name ## _vec_append(__name ## _vec_t *vector, __type value) {                                 \
         ds_vec_ensure_free_space((ds_vec_t *)vector, sizeof(__type));                                                  \
         vector->data[vector->values++] = value;                                                                        \
     }                                                                                                                  \
                                                                                                                        \
-    static inline void ds_ ## __name ## _vec_append_ptr(ds_ ## __name ## _vec_t *vector, __type *value) {              \
+    static inline void __name ## _vec_append_ptr(__name ## _vec_t *vector, __type *value) {                            \
         ds_vec_ensure_free_space((ds_vec_t *)vector, sizeof(__type));                                                  \
         vector->data[vector->values++] = *value;                                                                       \
     }                                                                                                                  \
                                                                                                                        \
-    static inline void ds_ ## __name ## _vec_destroy(ds_ ## __name ## _vec_t *vector) {                                \
+    static inline void __name ## _vec_destroy(__name ## _vec_t *vector) {                                              \
         ds_vec_destroy((ds_vec_t *)vector);                                                                            \
     }                                                                                                                  \
                                                                                                                        \
-    static inline void ds_ ## __name ## _vec_append_array(ds_ ## __name ## _vec_t *vector, __type const *data,         \
+    static inline void __name ## _vec_append_array(__name ## _vec_t *vector, __type const *data,                       \
             size_t size) {                                                                                             \
         ds_vec_reserve((ds_vec_t *)vector, vector->values + size, sizeof(__type));                                     \
         memcpy(vector->data + vector->values, data, size * sizeof(__type));                                            \
         vector->values = vector->values + size;                                                                        \
     }                                                                                                                  \
                                                                                                                        \
-    static inline void ds_ ## __name ## _vec_remove_noorder(ds_ ## __name ## _vec_t *vector, size_t index) {           \
+    static inline void __name ## _vec_remove_noorder(__name ## _vec_t *vector, size_t index) {                         \
         assert(index < vector->values);                                                                                \
                                                                                                                        \
         vector->data[index] = vector->data[--vector->values];                                                          \
     }                                                                                                                  \
                                                                                                                        \
-    static inline void ds_ ## __name ## _vec_remove(ds_ ## __name ## _vec_t *vector, size_t index) {                   \
+    static inline void __name ## _vec_remove(__name ## _vec_t *vector, size_t index) {                                 \
         assert(index < vector->values);                                                                                \
                                                                                                                        \
         vector->values--;                                                                                              \
         memcpy(&vector->data[index], &vector->data[index + 1], sizeof(__type) * (vector->values - index));             \
     }                                                                                                                  \
                                                                                                                        \
-    static inline void ds_ ## __name ## _vec_sort(ds_ ## __name ## _vec_t *vector, ds_cmp_func_t cmp_func) {           \
+    static inline void __name ## _vec_sort(__name ## _vec_t *vector, ds_cmp_func_t cmp_func) {                         \
         if (vector->values >= 2)                                                                                       \
             qsort(vector->data, vector->values, sizeof(__type), cmp_func);                                             \
     }                                                                                                                  \
                                                                                                                        \
-    static inline void ds_ ## __name ## _vec_uniq(ds_ ## __name ## _vec_t *vector, ds_cmp_func_t cmp_func) {           \
+    static inline void __name ## _vec_uniq(__name ## _vec_t *vector, ds_cmp_func_t cmp_func) {                         \
         if (vector->values >= 2) {                                                                                     \
             int j = 1;                                                                                                 \
                                                                                                                        \
@@ -103,7 +103,7 @@ void ds_vec_create(ds_vec_t *vector);
 void ds_vec_destroy(ds_vec_t *vector);
 void ds_vec_reserve(ds_vec_t *vector, size_t new_size, size_t type_size);
 
-DS_DECL_VECTOR(int, int)
+DS_DECL_VECTOR(ds_int, int)
 
 static inline int ds_int_cmp_func(const void *first, const void *second) {
     int f = *(int *) first, s = *(int *) second;
@@ -111,6 +111,14 @@ static inline int ds_int_cmp_func(const void *first, const void *second) {
     if (f < s) return -1;
     if (f > s) return 1;
     return 0;
+}
+
+DS_DECL_VECTOR(ds_str, const char *)
+
+static inline int ds_str_cmp_func(const void *first, const void *second) {
+    const char *f = (const char *) first, *s = (const char *) second;
+
+    return strcmp(f, s);
 }
 
 #endif /* DS__VEC_H */
