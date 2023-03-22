@@ -28,7 +28,7 @@ PPS != echo $(SRCS:.c=.c.pp) | sed -e 's/source\//$(BUILDDIR)\//g'
 TESTS != echo $(TESTSRCS:.c=) | sed -e 's/test\//$(BUILDDIR)\//g'
 
 .SUFFIXES:
-.PHONY: all options clean
+.PHONY: all tests clean dist install
 
 all: $(LIB)
 
