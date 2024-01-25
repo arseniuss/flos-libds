@@ -32,8 +32,11 @@ typedef struct {
     ds_clean_func_t clean_func;
 } ds_hashset_t;
 
-struct ds_hashset_iter_s;
-typedef struct ds_hashset_iter_s ds_hashset_iter_t;
+typedef struct ds_hashset_iter_s {
+    ds_hashset_t *hashset;
+    int slot;
+    struct ds_hashset_entry_s *entry;
+} ds_hashset_iter_t;
 
 int ds_hashset_create(ds_hashset_t *hs, size_t initial_size, ds_hash_func_t hash_func, ds_cmp_func_t cmp_func);
 int ds_hashset_create_ext(ds_hashset_t *hs, size_t initial_size, ds_hash_func_t hash_func, ds_cmp_func_t cmp_func,

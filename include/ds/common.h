@@ -32,6 +32,8 @@ typedef void *(*ds_alloc_func_t)(void *old, size_t size);
 typedef void *(*ds_realloc_func_t)(void *old, size_t size);
 typedef void (*ds_free_func_t)(void *data);
 
+ds_hash_t ds_str_hash_def(const void *data);
+
 void *ds_alloc_def(void *old, size_t size);
 void *ds_realloc_def(void *old, size_t size);
 void ds_free_def(void *old);

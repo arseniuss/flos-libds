@@ -24,8 +24,8 @@
     typedef struct {                                                                                                   \
         __type1 first;                                                                                                 \
         __type2 second;                                                                                                \
-    } ds_ ## __name ## _pair_t;
+    } __name ## _pair_t;
 
-DS_DECL_PAIR(ptr, void*, void*)
+DS_DECL_PAIR(ds_ptr, void*, void*)
 
 #endif /* DS__PAIR_H */

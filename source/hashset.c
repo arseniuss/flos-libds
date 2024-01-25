@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include <ds/hashset.h>
@@ -23,7 +24,7 @@
 
 #define DEFAULT_SLOTS   10
 #define LOAD_FACTOR     4/5
-#define SLOT_GROW       2/3
+#define SLOT_GROW       3/2
 
 #define ITER_START      (-1)
 #define ITER_FINISH     (-2)
@@ -32,12 +33,6 @@ struct ds_hashset_entry_s {
     struct ds_hashset_entry_s *next;
     ds_hash_t hash;
     char data[];
-};
-
-struct ds_hashset_iter_s {
-    ds_hashset_t *hashset;
-    int slot;
-    struct ds_hashset_entry_s *entry;
 };
 
 static int __hashset_init_slots(ds_hashset_t *hs, size_t initial_size) {
@@ -120,23 +115,26 @@ ds_hashset_reserve(ds_hashset_t *hs, int req_slots) {
         }
     } else if (req_slots >= hs->slots * LOAD_FACTOR) {
         int inc_slots = ds_next_prime(hs->slots * SLOT_GROW);
+        int new_slot;
         void *slots;
+        struct ds_hashset_entry_s **prev_next, *curr_entry, *tmp;
 
-        if (!(slots = hs->alloc_func(hs->data, inc_slots * sizeof (struct ds_hashset_entry_s *))))
+        assert(inc_slots >= hs->slots);
+
+        if (!(slots = hs->realloc_func(hs->data, inc_slots * sizeof (struct ds_hashset_entry_s *))))
             return 0;
 
         hs->data = (struct ds_hashset_entry_s **) slots;
 
-        memset(hs->data + hs->slots, 0, (inc_slots - hs->slots) * sizeof (struct ds_hashset_entry_s));
+        memset(hs->data + hs->slots, 0, (inc_slots - hs->slots) * sizeof (struct ds_hashset_entry_s *));
 
         for (int slot = 0; slot < hs->slots; slot++) {
-            struct ds_hashset_entry_s **prev_next = &hs->data[slot];
-            struct ds_hashset_entry_s *curr_entry = hs->data[slot];
-            int new_slot;
+            prev_next = &hs->data[slot];
+            curr_entry = hs->data[slot];
 
             while (curr_entry != NULL) {
-                if (slot != (new_slot = curr_entry->hash & inc_slots)) {
-                    struct ds_hashset_entry_s *tmp = curr_entry->next;
+                if (slot != (new_slot = curr_entry->hash % inc_slots)) {
+                    tmp = curr_entry->next;
 
                     curr_entry->next = hs->data[new_slot];
                     hs->data[new_slot] = curr_entry;
@@ -186,7 +184,7 @@ ds_hashset_insert_ext(ds_hashset_t *hs, const void *data, size_t size, size_t of
                 offsetof(struct ds_hashset_entry_s, data) + size)))
             return NULL;
 
-        memcpy(entry->data + offset, (char *) data + offset, size - offset);
+        memcpy((char *) entry->data + offset, (const char *) data + offset, size - offset);
         entry->hash = hash;
         entry->next = hs->data[slot];
         hs->data[slot] = entry;

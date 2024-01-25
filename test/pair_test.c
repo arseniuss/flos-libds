@@ -19,7 +19,7 @@
 
 #include "tap.h"
 
-DS_DECL_PAIR(ii, int, int)
+DS_DECL_PAIR(ds_ii, int, int)
 
 int
 main(void) {

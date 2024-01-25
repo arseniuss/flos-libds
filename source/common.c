@@ -17,12 +17,43 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <ds/common.h>
+
+/*
+ * modified FNV hash function (see http://www.isthe.com/chongo/tech/comp/fnv/)
+ */
+ds_hash_t
+hash_modfnv(const void *data, size_t len, ds_hash_t seed) {
+    const char *p = (const char *) data;
+
+    ds_hash_t hash;
+
+    hash = 2166136261u ^ seed;
+
+    while (len-- >= 1) {
+        hash = (hash ^ *(p++)) * 16777619u;
+    }
+
+    hash += hash << 13;
+    hash ^= hash >> 7;
+    hash += hash << 3;
+    hash ^= hash >> 17;
+    hash += hash << 5;
+
+    return hash;
+}
+
+ds_hash_t
+ds_str_hash_def(const void *data) {
+    return hash_modfnv(data, strlen((const char *) data), 0);
+}
 
 void*
 ds_alloc_def(void *old, size_t size) {
     if (old != NULL) {
+
         perror("ds_alloc_def: alloc mem free mem");
         exit(1);
     }
@@ -32,11 +63,13 @@ ds_alloc_def(void *old, size_t size) {
 
 void*
 ds_realloc_def(void *old, size_t size) {
+
     return realloc(old, size);
 }
 
 void
 ds_free_def(void *old) {
+
     free(old);
 }
 
@@ -50,6 +83,7 @@ static int __is_prime(int n) {
 
     for (int i = 3; i * i <= n; i += 2)
         if (n % i == 0)
+
             return 0;
 
     return 1;
