@@ -18,16 +18,16 @@
 #include <assert.h>
 #include <string.h>
 
-#include <ds/hashset.h>
+#include <flos/ds/hashset.h>
 
-#define MAX(a, b)       ((a) > (b) ? (a) : (b))
+#define MAX(a, b)     ((a) > (b) ? (a) : (b))
 
-#define DEFAULT_SLOTS   10
-#define LOAD_FACTOR     4/5
-#define SLOT_GROW       3/2
+#define DEFAULT_SLOTS 10
+#define LOAD_FACTOR   4 / 5
+#define SLOT_GROW     3 / 2
 
-#define ITER_START      (-1)
-#define ITER_FINISH     (-2)
+#define ITER_START    (-1)
+#define ITER_FINISH   (-2)
 
 struct ds_hashset_entry_s {
     struct ds_hashset_entry_s *next;
@@ -41,12 +41,12 @@ static int __hashset_init_slots(ds_hashset_t *hs, size_t initial_size) {
     if (initial_size > 0) {
         hs->slots = ds_next_prime(initial_size);
 
-        if (!(hs->data = (struct ds_hashset_entry_s **) hs->alloc_func(NULL,
-                hs->slots * sizeof (struct ds_hashset_entry_s *)))) {
+        if (!(hs->data = (struct ds_hashset_entry_s **)hs->alloc_func(NULL, hs->slots *
+                                                                                sizeof(struct ds_hashset_entry_s *)))) {
             return 0;
         }
 
-        memset(hs->data, 0, hs->slots * sizeof (struct ds_hashset_entry_s *));
+        memset(hs->data, 0, hs->slots * sizeof(struct ds_hashset_entry_s *));
     } else {
         hs->slots = 0;
         hs->data = NULL;
@@ -56,21 +56,20 @@ static int __hashset_init_slots(ds_hashset_t *hs, size_t initial_size) {
 }
 
 static void __hashset_free_entry(ds_hashset_t *hs, struct ds_hashset_entry_s *entry) {
-    if (hs->clean_func != NULL)
+    if (hs->clean_func != NULL) {
         hs->clean_func(entry->data);
+    }
     hs->free_func(entry);
 }
 
-int
-ds_hashset_create(ds_hashset_t *hs, size_t initial_size, ds_hash_func_t hash_func, ds_cmp_func_t cmp_func) {
+int ds_hashset_create(ds_hashset_t *hs, size_t initial_size, ds_hash_func_t hash_func, ds_cmp_func_t cmp_func) {
     return ds_hashset_create_ext(hs, initial_size, hash_func, cmp_func, ds_alloc_def, ds_realloc_def, ds_free_def,
-            NULL);
+                                 NULL);
 }
 
-int
-ds_hashset_create_ext(ds_hashset_t *hs, size_t initial_size, ds_hash_func_t hash_func, ds_cmp_func_t cmp_func,
-        ds_alloc_func_t alloc_func, ds_realloc_func_t realloc_func, ds_free_func_t free_func,
-        ds_clean_func_t clean_func) {
+int ds_hashset_create_ext(ds_hashset_t *hs, size_t initial_size, ds_hash_func_t hash_func, ds_cmp_func_t cmp_func,
+                          ds_alloc_func_t alloc_func, ds_realloc_func_t realloc_func, ds_free_func_t free_func,
+                          ds_clean_func_t clean_func) {
     hs->hash_func = hash_func;
     hs->cmp_func = cmp_func;
     hs->alloc_func = alloc_func;
@@ -81,8 +80,7 @@ ds_hashset_create_ext(ds_hashset_t *hs, size_t initial_size, ds_hash_func_t hash
     return __hashset_init_slots(hs, initial_size);
 }
 
-void
-ds_hashset_destroy(ds_hashset_t *hs) {
+void ds_hashset_destroy(ds_hashset_t *hs) {
     for (int i = 0; i < hs->slots; i++) {
         struct ds_hashset_entry_s *entry = hs->data[i], *next;
 
@@ -107,8 +105,7 @@ ds_hashset_destroy(ds_hashset_t *hs) {
     hs->free_func = NULL;
 }
 
-int
-ds_hashset_reserve(ds_hashset_t *hs, int req_slots) {
+int ds_hashset_reserve(ds_hashset_t *hs, int req_slots) {
     if (hs->slots == 0) {
         if (!__hashset_init_slots(hs, MAX(DEFAULT_SLOTS, req_slots * (2 - LOAD_FACTOR) - 1))) {
             return 0;
@@ -121,12 +118,13 @@ ds_hashset_reserve(ds_hashset_t *hs, int req_slots) {
 
         assert(inc_slots >= hs->slots);
 
-        if (!(slots = hs->realloc_func(hs->data, inc_slots * sizeof (struct ds_hashset_entry_s *))))
+        if (!(slots = hs->realloc_func(hs->data, inc_slots * sizeof(struct ds_hashset_entry_s *)))) {
             return 0;
+        }
 
-        hs->data = (struct ds_hashset_entry_s **) slots;
+        hs->data = (struct ds_hashset_entry_s **)slots;
 
-        memset(hs->data + hs->slots, 0, (inc_slots - hs->slots) * sizeof (struct ds_hashset_entry_s *));
+        memset(hs->data + hs->slots, 0, (inc_slots - hs->slots) * sizeof(struct ds_hashset_entry_s *));
 
         for (int slot = 0; slot < hs->slots; slot++) {
             prev_next = &hs->data[slot];
@@ -154,37 +152,39 @@ ds_hashset_reserve(ds_hashset_t *hs, int req_slots) {
     return 1;
 }
 
-void*
-ds_hashset_insert(ds_hashset_t *hs, const void *data, size_t size) {
+void *ds_hashset_insert(ds_hashset_t *hs, const void *data, size_t size) {
     return ds_hashset_insert_ext(hs, data, size, 0);
 }
 
-void*
-ds_hashset_insert_ext(ds_hashset_t *hs, const void *data, size_t size, size_t offset) {
-    if (hs->slots == 0 && !__hashset_init_slots(hs, DEFAULT_SLOTS))
+void *ds_hashset_insert_ext(ds_hashset_t *hs, const void *data, size_t size, size_t offset) {
+    if (hs->slots == 0 && !__hashset_init_slots(hs, DEFAULT_SLOTS)) {
         return NULL;
+    }
 
     ds_hash_t hash = hs->hash_func(data);
     int slot = hash % hs->slots;
     struct ds_hashset_entry_s *entry = hs->data[slot];
 
     while (entry != NULL) {
-        if (entry->hash == hash && hs->cmp_func(entry->data, data) == 0)
+        if (entry->hash == hash && hs->cmp_func(entry->data, data) == 0) {
             break;
+        }
         entry = entry->next;
     }
 
     if (entry == NULL) {
-        if (!ds_hashset_reserve(hs, hs->entries + 1))
+        if (!ds_hashset_reserve(hs, hs->entries + 1)) {
             return NULL;
+        }
 
         slot = hash % hs->slots;
 
-        if (!(entry = (struct ds_hashset_entry_s *) hs->alloc_func(NULL,
-                offsetof(struct ds_hashset_entry_s, data) + size)))
+        if (!(entry = (struct ds_hashset_entry_s *)hs->alloc_func(NULL,
+                                                                  offsetof(struct ds_hashset_entry_s, data) + size))) {
             return NULL;
+        }
 
-        memcpy((char *) entry->data + offset, (const char *) data + offset, size - offset);
+        memcpy((char *)entry->data + offset, (const char *)data + offset, size - offset);
         entry->hash = hash;
         entry->next = hs->data[slot];
         hs->data[slot] = entry;
@@ -194,28 +194,29 @@ ds_hashset_insert_ext(ds_hashset_t *hs, const void *data, size_t size, size_t of
     return entry->data;
 }
 
-void*
-ds_hashset_search(const ds_hashset_t *hs, const void *data) {
-    if (hs->slots == 0)
+void *ds_hashset_search(const ds_hashset_t *hs, const void *data) {
+    if (hs->slots == 0) {
         return NULL;
+    }
 
     ds_hash_t hash = hs->hash_func(data);
     int slot = hash % hs->slots;
     struct ds_hashset_entry_s *entry = hs->data[slot];
 
     while (entry != NULL) {
-        if (entry->hash == hash && hs->cmp_func(entry->data, data) == 0)
+        if (entry->hash == hash && hs->cmp_func(entry->data, data) == 0) {
             break;
+        }
         entry = entry->next;
     }
 
     return entry ? entry->data : NULL;
 }
 
-void
-ds_hashset_remove(ds_hashset_t *hs, const void *data) {
-    if (hs->slots == 0)
+void ds_hashset_remove(ds_hashset_t *hs, const void *data) {
+    if (hs->slots == 0) {
         return;
+    }
 
     ds_hash_t hash = hs->hash_func(data);
     int slot = hash % hs->slots;
@@ -247,13 +248,13 @@ ds_hashset_remove(ds_hashset_t *hs, const void *data) {
     }
 }
 
-void
-ds_hashset_remove_direct(ds_hashset_t *hs, const void *data) {
-    if (hs->slots == 0)
+void ds_hashset_remove_direct(ds_hashset_t *hs, const void *data) {
+    if (hs->slots == 0) {
         return;
+    }
 
-    struct ds_hashset_entry_s *data_entry = (struct ds_hashset_entry_s *) ((const char *) data -
-            offsetof(struct ds_hashset_entry_s, data));
+    struct ds_hashset_entry_s *data_entry =
+        (struct ds_hashset_entry_s *)((const char *)data - offsetof(struct ds_hashset_entry_s, data));
     int slot = data_entry->hash % hs->slots;
     struct ds_hashset_entry_s *iter_entry = hs->data[slot];
 
@@ -275,11 +276,9 @@ ds_hashset_remove_direct(ds_hashset_t *hs, const void *data) {
             }
         }
     }
-
 }
 
-void
-ds_hashset_clear(ds_hashset_t *hs) {
+void ds_hashset_clear(ds_hashset_t *hs) {
     for (int slot = 0; slot < hs->slots; slot++) {
         while (hs->data[slot] != NULL) {
             struct ds_hashset_entry_s *entry = hs->data[slot];
@@ -292,16 +291,15 @@ ds_hashset_clear(ds_hashset_t *hs) {
     hs->data = 0;
 }
 
-void
-ds_hashset_iter_reset(ds_hashset_t *hs, ds_hashset_iter_t *iter) {
+void ds_hashset_iter_reset(ds_hashset_t *hs, ds_hashset_iter_t *iter) {
     iter->hashset = hs;
     iter->slot = ITER_START;
 }
 
-void*
-ds_hashset_iter_next(ds_hashset_iter_t *iter) {
-    if (iter->slot == ITER_FINISH)
+void *ds_hashset_iter_next(ds_hashset_iter_t *iter) {
+    if (iter->slot == ITER_FINISH) {
         return NULL;
+    }
 
     if (iter->slot != ITER_START && iter->entry != NULL && iter->entry->next != NULL) {
         iter->entry = iter->entry->next;

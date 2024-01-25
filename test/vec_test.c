@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <ds/vec.h>
+#include <flos/ds/vec.h>
 
 #include "tap.h"
 
-int
-main(void) {
+int main(void) {
     plan(14);
 
     {
@@ -61,13 +60,15 @@ main(void) {
 
         ds_int_vec_sort(&ivec, ds_int_cmp_func);
 
-        for (size_t i = 0; i < ivec.values; i++)
+        for (size_t i = 0; i < ivec.values; i++) {
             diagf("ivec.data[%ld] = %i", i, ivec.data[i]);
+        }
 
         ds_int_vec_uniq(&ivec, ds_int_cmp_func);
 
-        for (size_t i = 0; i < ivec.values; i++)
+        for (size_t i = 0; i < ivec.values; i++) {
             diagf("ivec.data[%ld] = %i", i, ivec.data[i]);
+        }
 
         ds_int_vec_destroy(&ivec);
 

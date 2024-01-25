@@ -1,4 +1,5 @@
+.vscode/
+*.tar.gz
 /build/
 /lib/
 nbproject/
-*.tar.gz

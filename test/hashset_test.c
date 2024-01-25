@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <ds/hashset.h>
+#include <flos/ds/hashset.h>
 
 #include "tap.h"
 
-int
-main(void) {
+int main(void) {
     plan(1);
 
     {

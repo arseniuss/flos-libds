@@ -15,14 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <ds/pair.h>
+#include <flos/ds/pair.h>
 
 #include "tap.h"
 
 DS_DECL_PAIR(ds_ii, int, int)
 
-int
-main(void) {
+int main(void) {
     plan(1);
 
     {

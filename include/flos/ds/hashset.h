@@ -18,7 +18,7 @@
 #ifndef DS__HASHSET_H
 #define DS__HASHSET_H
 
-#include <ds/common.h>
+#include <flos/ds/common.h>
 
 typedef struct {
     struct ds_hashset_entry_s **data;
@@ -40,7 +40,8 @@ typedef struct ds_hashset_iter_s {
 
 int ds_hashset_create(ds_hashset_t *hs, size_t initial_size, ds_hash_func_t hash_func, ds_cmp_func_t cmp_func);
 int ds_hashset_create_ext(ds_hashset_t *hs, size_t initial_size, ds_hash_func_t hash_func, ds_cmp_func_t cmp_func,
-        ds_alloc_func_t alloc_func, ds_realloc_func_t realloc_func, ds_free_func_t free_func, ds_clean_func_t clean_func);
+                          ds_alloc_func_t alloc_func, ds_realloc_func_t realloc_func, ds_free_func_t free_func,
+                          ds_clean_func_t clean_func);
 void ds_hashset_destroy(ds_hashset_t *hs);
 
 int ds_hashset_reserve(ds_hashset_t *hs, int req_slots);

@@ -18,12 +18,12 @@
 #ifndef DS__COMMON_H
 #define DS__COMMON_H
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 typedef uint32_t ds_hash_t;
 
-typedef ds_hash_t(*ds_hash_func_t)(const void *data);
+typedef ds_hash_t (*ds_hash_func_t)(const void *data);
 
 typedef int (*ds_cmp_func_t)(const void *first, const void *second);
 

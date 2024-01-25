@@ -4,11 +4,11 @@
 LIB = lib/libds.a
 
 HDRS = \
-    include/ds/common.h \
-    include/ds/hashset.h \
-    include/ds/pair.h \
-    include/ds/vec.h \
-    include/ds.h
+    include/flos/ds/common.h \
+    include/flos/ds/hashset.h \
+    include/flos/ds/pair.h \
+    include/flos/ds/vec.h \
+    include/flos/ds.h
 
 SRCS = \
     source/common.c \
