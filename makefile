@@ -28,7 +28,7 @@ PPS != echo $(SRCS:.c=.c.pp) | sed -e 's/source\//$(BUILDDIR)\//g'
 TESTS != echo $(TESTSRCS:.c=) | sed -e 's/test\//$(BUILDDIR)\//g'
 
 .SUFFIXES:
-.PHONY: all tests clean dist install
+.PHONY: all check clean dist install
 
 all: $(LIB)
 
@@ -42,7 +42,7 @@ $(BUILDDIR)/%.o: source/%.c
 	$(PP) $(CFLAGS) $< > $(BUILDDIR)/$*.c.pp
 	$(CC) $(CFLAGS) -MMD -MF $(BUILDDIR)/$*.d -c -o $@ $<
 
-tests: $(TESTS) $(LIB)
+check: $(TESTS) $(LIB)
 	$(PROVE) $(PROVE_FLAGS) $(TESTS)
 
 build/%: test/%.c $(LIB)
