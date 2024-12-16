@@ -1,7 +1,8 @@
 #!env make
 .POSIX:
 
-LIB = lib/libds.a
+TARGETS = \
+	lib/libds.a
 
 HDRS = \
     include/flos/ds/common.h \
@@ -22,36 +23,38 @@ TESTSRCS = \
 
 include config.mk
 
-OBJS != echo $(SRCS:.c=.o) | sed -e 's/source\//$(BUILDDIR)\//g'
-DEPS != echo $(SRCS:.c=.d) | sed -e 's/source\//$(BUILDDIR)\//g'
-PPS != echo $(SRCS:.c=.c.pp) | sed -e 's/source\//$(BUILDDIR)\//g'
-TESTS != echo $(TESTSRCS:.c=) | sed -e 's/test\//$(BUILDDIR)\//g'
+CFLAGS += -Iinclude
+
+OBJS != echo $(SRCS:.c=.o) | sed -e 's/source\//$(builddir)\//g'
+DEPS != echo $(SRCS:.c=.d) | sed -e 's/source\//$(builddir)\//g'
+PPS != echo $(SRCS:.c=.c.pp) | sed -e 's/source\//$(builddir)\//g'
+TESTS != echo $(TESTSRCS:.c=) | sed -e 's/test\//$(builddir)\//g'
 
 .SUFFIXES:
 .PHONY: all check clean dist install
 
-all: $(LIB)
+all: $(TARGETS)
 
-$(LIB): $(OBJS)
+$(TARGETS): $(OBJS)
 	mkdir -p lib
 	rm -f $@
 	$(AR) -rcs $@ $^
 
-$(BUILDDIR)/%.o: source/%.c
-	@mkdir -p $(BUILDDIR)/$(*D)
-	$(PP) $(CFLAGS) $< > $(BUILDDIR)/$*.c.pp
-	$(CC) $(CFLAGS) -MMD -MF $(BUILDDIR)/$*.d -c -o $@ $<
+$(builddir)/%.o: source/%.c
+	@mkdir -p $(builddir)/$(*D)
+	$(PP) $(CFLAGS) $< > $(builddir)/$*.c.pp
+	$(CC) $(CFLAGS) -MMD -MF $(builddir)/$*.d -c -o $@ $<
 
-check: $(TESTS) $(LIB)
+check: $(TESTS) $(TARGETS)
 	$(PROVE) $(PROVE_FLAGS) $(TESTS)
 
-build/%: test/%.c $(LIB)
-	@mkdir -p $(BUILDDIR)/$(*D)
-	$(PP) $(CFLAGS) $< > $(BUILDDIR)/$*.c.pp
-	$(CC) $(CFLAGS) -MMD -MF $(BUILDDIR)/$*.d -o $@ $^
+build/%: test/%.c $(TARGETS)
+	@mkdir -p $(builddir)/$(*D)
+	$(PP) $(CFLAGS) $< > $(builddir)/$*.c.pp
+	$(CC) $(CFLAGS) -MMD -MF $(builddir)/$*.d -o $@ $^
 
 clean:
-	rm -rf $(BUILDDIR) lib libds-$(VERSION).tar.gz
+	rm -rf $(builddir) lib libds-$(VERSION).tar.gz
 
 dist: clean
 	mkdir -p libds-$(VERSION)
